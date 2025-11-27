@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Blorb Damage Calculator - Enhanced</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        h1, h2, h3 {
+            color: #0056b3;
+        }
+
+        .dark-mode h1, .dark-mode h2, .dark-mode h3 {
+            color: #90caf9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .section {
+            background-color: #1e1e1e;
+            box-shadow: 0 4px 8px rgba(255,255,255,0.05);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: calc(100% - 12px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .dark-mode input, .dark-mode select {
+            background-color: #333;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        
+        /* Define color variables for consistency */
+        .color-2 { color: #868686; }
+        .color-3 { color: #64FF5C; }
+        .color-4 { color: #E88C2A; }
+        .color-5 { color: #7114BD; }
+        .color-6 { color: #E82A2A; }
+        .color-7 { color: #2AE8D2; }
+
+        /* Custom colors for Accessory titles */
+        .wind-title { color: #03fc6b; }
+        .earth-title { color: #fcb103; }
+        .fire-title { color: #e82b00; }
+        .water-title { color: #0055e8; }
+        
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            background-color: #eaf6ff;
+            border: 1px solid #a8cde8;
+        }
+
+        .dark-mode .result {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #accessoriesContainer, #elementBonusesContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* Styling for the new element bonus groups */
+        .element-bonus-group {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+        }
+
+        .dark-mode .element-bonus-group {
+            border-color: #333;
+            background-color: #262626;
+        }
+
+        .element-bonus-group h4 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .dark-mode .element-bonus-group h4 {
+            border-bottom: 1px solid #444;
+        }
+        
+        /* Skill Prof is now a direct child of the section, give it some space */
+        .raw-bonus-separator {
+            margin-top: 20px;
+            padding-top: 5px;
+            border-top: 1px solid #ccc; /* Add a subtle line to separate it */
+        }
+        .dark-mode .raw-bonus-separator {
+            border-top: 1px solid #444;
+        }
+        /* End of new styling */
+
+        .comparison-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .comparison-section {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        #bossComparisonSection {
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+        }
+
+        #mobComparisonSection {
+            background-color: #f0f9e6;
+            border: 1px solid #c8e6a1;
+        }
+
+        .dark-mode #bossComparisonSection {
+            background-color: #0a263a;
+            border-color: #1a4d6e;
+        }
+
+        .dark-mode #mobComparisonSection {
+            background-color: #1c2a0a;
+            border-color: #3d591c;
+        }
+
+        .accessory-form-group {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .accessory-form-group h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .green-text {
+            color: green;
+        }
+
+        .red-text {
+            color: red;
+        }
+
+        #footer {
+            text-align: center;
+            font-size: 0.8em;
+            color: red;
+            margin-top: 20px;
+        }
+        
+        #footer p {
+            margin: 0;
+            padding: 0;
+        }
+
+        .dark-mode #footer {
+            color: #ff69b4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Blorb Damage Calculator</h1>
+        <button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+        <div class="section">
+            <h2>Accessory Bonuses</h2>
+            <div id="accessoriesContainer"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Statue of Order and Constellation Bonuses</h2>
+            <p>Enter the percentage bonuses gained from your Statue of Order and Constellation progress. (These are additive % bonuses).</p>
+            <label>Fire Bonus (%): <input type="number" id="statueFireBonus" value="0" oninput="calculateAll();"/></label>
+            <label>Wind Bonus (%): <input type="number" id="statueWindBonus" value="0" oninput="calculateAll();"/></label>
+            <label>Water Bonus (%): <input type="number" id="statueWaterBonus" value="0" oninput="calculateAll();"/></label>
+            <label>Earth Bonus (%): <input type="number" id="statueEarthBonus" value="0" oninput="calculateAll();"/></label>
+        </div>
+        
+        <div class="section">
+            <h2>Other Elemental Raw Bonuses</h2>
+            <div id="elementBonusesContainer">
+                
+                <div class="element-bonus-group">
+                    <h4>Wind Bonuses</h4>
+                    <label>Ellie Wind +Dmg %: <input type="number" id="ellie" value="0" oninput="calculateAll();"/></label>
+                    <label>Wind Understanding Wind Dmg%: <input type="number" id="windUnderstanding" value="0" oninput="calculateAll();"/></label>
+                    <label>Wind Relic: <input type="number" id="windRelic" value="0" oninput="calculateAll();"/></label>
+                </div>
+                
+                <div class="element-bonus-group">
+                    <h4>Earth Bonuses</h4>
+                    <label>Zeke Earth +Dmg %: <input type="number" id="zeke" value="0" oninput="calculateAll();"/></label>
+                    <label>Earth Understanding Earth Dmg%: <input type="number" id="earthUnderstanding" value="0" oninput="calculateAll();"/></label>
+                    <label>Earth Relic: <input type="number" id="earthRelic" value="0" oninput="calculateAll();"/></label>
+                </div>
+                
+                <div class="element-bonus-group">
+                    <h4>Fire Bonuses</h4>
+                    <label>Miho Fire +Dmg %: <input type="number" id="miho" value="0" oninput="calculateAll();"/></label>
+                    <label>Fire Understanding Fire Dmg%: <input type="number" id="fireUnderstanding" value="0" oninput="calculateAll();"/></label>
+                    <label>Fire Relic: <input type="number" id="fireRelic" value="0" oninput="calculateAll();"/></label>
+                </div>
+                
+                <div class="element-bonus-group">
+                    <h4>Water Bonuses</h4>
+                    <label>Luna Water +Dmg %: <input type="number" id="luna" value="0" oninput="calculateAll();"/></label>
+                    <label>Water Understanding Water Dmg%: <input type="number" id="waterUnderstanding" value="0" oninput="calculateAll();"/></label>
+                    <label>Water Relic: <input type="number" id="waterRelic" value="0" oninput="calculateAll();"/></label>
+                </div>
+
+            </div>
+            
+            <div class="raw-bonus-separator">
+                <label>Skill Proficiency All Attribute%: <input type="number" id="skillProf" value="0" oninput="calculateAll();"/></label>
+            </div>
+        </div>
+
+        <div class="result" id="results">
+            <h3>Current Elemental Damage</h3>
+            Calculation results will appear here.
+        </div>
+
+        <div class="comparison-container">
+            <div class="comparison-section" id="bossComparisonSection">
+                <h2>Boss Damage Comparison</h2>
+                <label>Current Level: <input type="number" id="currentLevel" value="1" min="1" max="51" oninput="calculateAll()"/></label>
+                <label>Target Level: <input type="number" id="targetLevel" value="1" min="1" max="51" oninput="calculateAll()"/></label>
+                <div class="result" id="bossComparisonResult">
+                    Enter level values to see the difference between current and target level.
+                </div>
+            </div>
+
+            <div class="comparison-section" id="mobComparisonSection">
+                <h2>Normal Mob Damage Comparison</h2>
+                <label>Current Level: <input type="number" id="currentLevelMob" value="1" min="1" max="51" oninput="calculateAll()"/></label>
+                <label>Target Level: <input type="number" id="targetLevelMob" value="1" min="1" max="51" oninput="calculateAll()"/></label>
+                <div class="result" id="mobComparisonResult">
+                    Enter level values to see the difference between current and target level.
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="accessoryComparisonSection">
+            <h2>Accessory Change Simulation</h2>
+            <p>See how your element damages change when you equip a new accessory.</p>
+
+            <label>Accessory Type:
+                <select id="accessoryToCompare" onchange="createAccessoryComparisonForm()">
+                    <option value="none">-- Select --</option>
+                    <option value="wind">Wind</option>
+                    <option value="earth">Earth</option>
+                    <option value="fire">Fire</option>
+                    <option value="water">Water</option>
+                </select>
+            </label>
+
+            <div id="accessoryComparisonForm"></div>
+
+            <div class="result" id="accessoryComparisonResult">
+                Select an option above to open the comparison form.
+            </div>
+
+            <button onclick="equipNewAccessory()" style="margin-top: 15px;">Equip New Accessory</button>
+        </div>
+
+
+        <div id="footer">
+            <p>Made by LegendTele @astrolec</p>
+            <p>Inspired by 르나00</p>
+        </div>
+    </div>
+
+    <script>
+        const ELEMENTS = ["wind", "earth", "fire", "water"];
+        const ELEMENT_LABELS = {
+            wind: "Wind",
+            fire: "Fire",
+            earth: "Earth",
+            water: "Water"
+        };
+        const ACCESSORY_ELEMENTS = [...ELEMENTS, "all"];
+        const SUBSTAT_VALUES = [2, 3, 4, 5, 6, 7];
+
+        const ELEMENTS_DATA = {
+            wind: { companion: "ellie", understanding: "windUnderstanding", relic: "windRelic", label: "Wind", statueBonus: "statueWindBonus", colorClass: "wind-title" },
+            earth: { companion: "zeke", understanding: "earthUnderstanding", relic: "earthRelic", label: "Earth", statueBonus: "statueEarthBonus", colorClass: "earth-title" },
+            fire: { companion: "miho", understanding: "fireUnderstanding", relic: "fireRelic", label: "Fire", statueBonus: "statueFireBonus", colorClass: "fire-title" },
+            water: { companion: "luna", understanding: "waterUnderstanding", relic: "waterRelic", label: "Water", statueBonus: "statueWaterBonus", colorClass: "water-title" },
+        };
+        
+        const COLOR_MAP = {
+            2: '#868686',
+            3: '#64FF5C',
+            4: '#E88C2A',
+            5: '#7114BD',
+            6: '#E82A2A',
+            7: '#2AE8D2'
+        };
+
+        const BOSS_BONUS_TABLE = {
+            1: 0, 2: 0, 3: 50, 4: 50, 5: 50, 6: 50, 7: 50, 8: 100,
+            9: 100, 10: 100, 11: 100, 12: 150, 13: 150, 14: 150,
+            15: 150, 16: 200, 17: 200, 18: 200, 19: 200, 20: 250,
+            21: 250, 22: 250, 23: 250, 24: 350, 25: 350, 26: 350,
+            27: 350, 28: 350, 29: 450, 30: 450, 31: 450, 32: 450,
+            33: 550, 34: 550, 35: 550, 36: 550, 37: 550, 38: 550,
+            39: 650, 40: 650, 41: 650, 42: 650, 43: 650, 44: 650,
+            45: 750, 46: 750, 47: 750, 48: 750, 49: 750, 50: 750,
+            51: 850
+        };
+
+        const MOB_BONUS_TABLE = {
+            1: 0, 2: 10, 3: 10, 4: 20, 5: 30, 6: 40, 7: 50, 8: 50,
+            9: 70, 10: 90, 11: 110, 12: 110, 13: 130, 14: 150,
+            15: 170, 16: 170, 17: 190, 18: 210, 19: 230, 20: 230,
+            21: 250, 22: 270, 23: 290, 24: 290, 25: 310, 26: 330,
+            27: 350, 28: 370, 29: 370, 30: 400, 31: 430, 32: 460,
+            33: 460, 34: 480, 35: 500, 36: 520, 37: 540, 38: 560,
+            39: 560, 40: 580, 41: 600, 42: 620, 43: 640, 44: 660,
+            45: 660, 46: 680, 47: 700, 48: 720, 49: 740, 50: 760,
+            51: 760
+        };
+        
+        function getSubstatColor(value) {
+            return COLOR_MAP[value] || '#333';
+        }
+        
+        function saveSettings() {
+            const settings = {};
+            for (const key of ELEMENTS) {
+                // Save Accessory related settings
+                settings[`${key}Raw`] = document.getElementById(`${key}Raw`).value;
+                for (let i = 1; i <= 4; i++) {
+                    settings[`${key}Slot${i}Type`] = document.getElementById(`${key}Slot${i}Type`).value;
+                    settings[`${key}Slot${i}Val`] = document.getElementById(`${key}Slot${i}Val`).value;
+                }
+
+                // Save Statue/Constellation settings
+                settings[ELEMENTS_DATA[key].statueBonus] = document.getElementById(ELEMENTS_DATA[key].statueBonus).value; 
+                
+                // Save Other Element (Companion/Understanding/Relic) settings
+                const elData = ELEMENTS_DATA[key];
+                settings[elData.companion] = document.getElementById(elData.companion).value;
+                settings[elData.understanding] = document.getElementById(elData.understanding).value;
+                settings[elData.relic] = document.getElementById(elData.relic).value;
+            }
+            
+            // Save Global setting
+            settings['skillProf'] = document.getElementById('skillProf').value;
+            localStorage.setItem('blorbCalculatorSettings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('blorbCalculatorSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                for (const key of ELEMENTS) {
+                    // Load Accessory related settings
+                    if (settings[`${key}Raw`]) document.getElementById(`${key}Raw`).value = settings[`${key}Raw`];
+                    for (let i = 1; i <= 4; i++) {
+                        if (settings[`${key}Slot${i}Type`]) document.getElementById(`${key}Slot${i}Type`).value = settings[`${key}Slot${i}Type`];
+                        if (settings[`${key}Slot${i}Val`]) document.getElementById(`${key}Slot${i}Val`).value = settings[`${key}Slot${i}Val`];
+                    }
+
+                    // Load Statue/Constellation settings
+                    if (settings[ELEMENTS_DATA[key].statueBonus]) document.getElementById(ELEMENTS_DATA[key].statueBonus).value = settings[ELEMENTS_DATA[key].statueBonus];
+                    
+                    // Load Other Element (Companion/Understanding/Relic) settings
+                    const elData = ELEMENTS_DATA[key];
+                    if (settings[elData.companion]) document.getElementById(elData.companion).value = settings[elData.companion];
+                    if (settings[elData.understanding]) document.getElementById(elData.understanding).value = settings[elData.understanding];
+                    if (settings[elData.relic]) document.getElementById(elData.relic).value = settings[elData.relic];
+                }
+                
+                // Load Global setting
+                if (settings['skillProf']) document.getElementById('skillProf').value = settings['skillProf'];
+            }
+        }
+
+        function createAccessorySection() {
+            const container = document.getElementById("accessoriesContainer");
+            container.innerHTML = "";
+            for (const key of ELEMENTS) {
+                const el = ELEMENTS_DATA[key];
+                // Accessing the new colorClass property for styling the title
+                let html = `<div><h4 class="${el.colorClass}">${el.label} Accessory</h4>`;
+                html += `<label>Base ${el.label} Damage: <input type="number" id="${key}Raw" value="0" oninput="calculateAll()"/></label>`;
+                for (let i = 1; i <= 4; i++) {
+                    const selectedVal = Number(document.getElementById(`${key}Slot${i}Val`)?.value) || 0;
+                    const color = selectedVal > 1 ? getSubstatColor(selectedVal) : '';
+                    html += `
+                        <label>Slot ${i}:
+                            <select id="${key}Slot${i}Type" onchange="handleMainAccessoryChange('${key}', ${i})" style="color: ${color};">
+                                <option value="none">--</option>
+                                ${ACCESSORY_ELEMENTS.map(accEl =>
+                                    `<option value="${accEl}">${ELEMENT_LABELS[accEl] || "All Attributes"}</option>`
+                                ).join("")}
+                            </select>
+                            <select id="${key}Slot${i}Val" onchange="handleMainAccessoryChange('${key}', ${i})" style="color: ${color};">
+                                ${SUBSTAT_VALUES.map(v => `<option value="${v}">${v}%</option>`).join("")}
+                            </select>
+                        </label>
+                    `;
+                }
+                html += "</div>";
+                container.innerHTML += html;
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        function getBossBonus(level) {
+            return BOSS_BONUS_TABLE[level] || 0;
+        }
+
+        function getMobBonus(level) {
+            return MOB_BONUS_TABLE[level] || 0;
+        }
+
+        function getAccessoryData(targetAccessories = {}) {
+          const accessories = {};
+          for (const key of ELEMENTS) {
+            if (targetAccessories[key]) {
+              accessories[key] = targetAccessories[key];
+            } else {
+              accessories[key] = {
+                raw: Number(document.getElementById(`${key}Raw`).value) || 0,
+                slots: []
+              };
+              for (let i = 1; i <= 4; i++) {
+                accessories[key].slots.push({
+                  type: document.getElementById(`${key}Slot${i}Type`).value,
+                  val: Number(document.getElementById(`${key}Slot${i}Val`).value) || 0
+                });
+              }
+            }
+          }
+          return accessories;
+        }
+        
+        function getStatueBonuses() {
+            return {
+                fireBonus: Number(document.getElementById('statueFireBonus').value) || 0,
+                windBonus: Number(document.getElementById('statueWindBonus').value) || 0,
+                waterBonus: Number(document.getElementById('statueWaterBonus').value) || 0,
+                earthBonus: Number(document.getElementById('statueEarthBonus').value) || 0,
+            };
+        }
+
+        function calculateDamage(accessories) {
+          const allAccessories = getAccessoryData(accessories);
+          const damages = {};
+          const otherBonuses = getOtherBonuses();
+          const statueBonuses = getStatueBonuses(); 
+
+          for (const key of ELEMENTS) {
+            const elData = ELEMENTS_DATA[key];
+            let totalPercentageBonus = 0;
+            let totalRawBonus = allAccessories[key].raw;
+
+            for (const accKey of ELEMENTS) {
+              const acc = allAccessories[accKey];
+              for (const slot of acc.slots) {
+                if (slot.type === "none") continue;
+                
+                let bonus = slot.val;
+                if (slot.type === accKey) {
+                  bonus *= 2;
+                }
+                
+                if (slot.type === "all") {
+                  totalPercentageBonus += bonus;
+                } else if (slot.type === key) {
+                  totalPercentageBonus += bonus;
+                }
+              }
+            }
+
+            // ADD THE STATUE/CONSTELLATION BONUS
+            if (key === 'fire') {
+                totalPercentageBonus += statueBonuses.fireBonus;
+            } else if (key === 'wind') {
+                totalPercentageBonus += statueBonuses.windBonus;
+            } else if (key === 'water') {
+                totalPercentageBonus += statueBonuses.waterBonus;
+            } else if (key === 'earth') {
+                totalPercentageBonus += statueBonuses.earthBonus;
+            }
+
+            // ADD OTHER RAW BONUSES (Companion, Understanding, Relic, SkillProf)
+            totalRawBonus += otherBonuses[elData.companion] + otherBonuses[elData.understanding] + otherBonuses[elData.relic] + otherBonuses.skillProf;
+
+            const totalDamage = totalRawBonus * (1 + totalPercentageBonus / 100);
+            damages[key] = { totalDamage, totalPercentageBonus };
+          }
+          return damages;
+        }
+
+        function getOtherBonuses() {
+          const bonuses = {};
+          for (const key of ELEMENTS) {
+            const elData = ELEMENTS_DATA[key];
+            // Since the IDs remain the same, we simply retrieve the values.
+            bonuses[elData.companion] = Number(document.getElementById(elData.companion).value) || 0;
+            bonuses[elData.understanding] = Number(document.getElementById(elData.understanding).value) || 0;
+            bonuses[elData.relic] = Number(document.getElementById(elData.relic).value) || 0;
+          }
+          bonuses.skillProf = Number(document.getElementById("skillProf").value) || 0;
+          return bonuses;
+        }
+
+        function updateResults() {
+            const damages = calculateDamage();
+            const results = [];
+            
+            for (const key of ELEMENTS) {
+                const elData = ELEMENTS_DATA[key];
+                results.push(`⚡ **${elData.label} Damage:** ${damages[key].totalDamage.toFixed(2)} (${damages[key].totalPercentageBonus.toFixed(2)}% Bonus)`);
+            }
+            document.getElementById("results").innerHTML = "<h3>Current Elemental Damage</h3>" + results.join("<br/>");
+        }
+
+        function compareBossDamage() {
+            const currentLevel = Number(document.getElementById("currentLevel").value) || 0;
+            const targetLevel = Number(document.getElementById("targetLevel").value) || 0;
+
+            const currentBossBonus = getBossBonus(currentLevel);
+            const targetBossBonus = getBossBonus(targetLevel);
+
+            let comparisonText = "";
+
+            if (currentLevel <= 0 || targetLevel <= 0) {
+              comparisonText = "Please enter valid levels (1-51).";
+            } else if (currentLevel >= targetLevel) {
+                comparisonText = `Target level must be higher than the current level.`;
+            } else if (currentBossBonus === targetBossBonus) {
+                comparisonText = `No damage bonus increase found.`;
+            } else {
+                const damageIncreasePercentage = ((1 + targetBossBonus/100) / (1 + currentBossBonus/100) - 1) * 100;
+                comparisonText = `Your damage will increase by **%${damageIncreasePercentage.toFixed(2)}**.`;
+            }
+
+            document.getElementById("bossComparisonResult").innerHTML = comparisonText;
+        }
+
+        function compareMobDamage() {
+            const currentLevel = Number(document.getElementById("currentLevelMob").value) || 0;
+            const targetLevel = Number(document.getElementById("targetLevelMob").value) || 0;
+
+            const currentMobBonus = getMobBonus(currentLevel);
+            const targetMobBonus = getMobBonus(targetLevel);
+
+            let comparisonText = "";
+
+            if (currentLevel <= 0 || targetLevel <= 0) {
+              comparisonText = "Please enter valid levels (1-51).";
+            } else if (currentLevel >= targetLevel) {
+                comparisonText = `Target level must be higher than the current level.`;
+            } else if (currentMobBonus === targetMobBonus) {
+                comparisonText = `No damage bonus increase found.`;
+            } else {
+                const damageIncreasePercentage = ((1 + targetMobBonus/100) / (1 + currentMobBonus/100) - 1) * 100;
+                comparisonText = `Your damage will increase by **%${damageIncreasePercentage.toFixed(2)}**.`;
+            }
+
+            document.getElementById("mobComparisonResult").innerHTML = comparisonText;
+        }
+
+        function createAccessoryComparisonForm() {
+            const selectedElement = document.getElementById("accessoryToCompare").value;
+            const formContainer = document.getElementById("accessoryComparisonForm");
+            formContainer.innerHTML = "";
+
+            if (selectedElement === "none") {
+                document.getElementById("accessoryComparisonResult").innerHTML = "Select an option above to open the comparison form.";
+                return;
+            }
+            
+            const colorClass = ELEMENTS_DATA[selectedElement].colorClass;
+
+            const oldAccLabel = `${ELEMENT_LABELS[selectedElement]} (Current) Accessory`;
+            const newAccLabel = `${ELEMENT_LABELS[selectedElement]} (New) Accessory`;
+
+            const currentRawValue = document.getElementById(`${selectedElement}Raw`).value;
+            const currentSlots = [];
+            for(let i = 1; i <= 4; i++) {
+                const type = document.getElementById(`${selectedElement}Slot${i}Type`).value;
+                const val = document.getElementById(`${selectedElement}Slot${i}Val`).value;
+                currentSlots.push({ type, val });
+            }
+
+            let html = `
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="accessory-form-group" style="flex: 1;">
+                        <h4 class="${colorClass}">${oldAccLabel}</h4>
+                        <label>Base Damage: <input type="number" id="oldAccRaw" value="${currentRawValue}" oninput="compareAccessories()"/></label>
+            `;
+            for (let i = 1; i <= 4; i++) {
+                const selectedSubstatType = currentSlots[i-1].type;
+                const selectedSubstatVal = Number(currentSlots[i-1].val);
+                const color = getSubstatColor(selectedSubstatVal);
+                html += `
+                    <label>Slot ${i}:
+                        <select id="oldAccSlot${i}Type" onchange="compareAccessories(); colorComparisonSelects('oldAccSlot${i}Type', 'oldAccSlot${i}Val')" style="color: ${color};">
+                            <option value="none">--</option>
+                            ${ACCESSORY_ELEMENTS.map(accEl =>
+                                `<option value="${accEl}" ${selectedSubstatType === accEl ? 'selected' : ''}>${ELEMENT_LABELS[accEl] || "All Attributes"}</option>`
+                            ).join("")}
+                        </select>
+                        <select id="oldAccSlot${i}Val" onchange="compareAccessories(); colorComparisonSelects('oldAccSlot${i}Type', 'oldAccSlot${i}Val')" style="color: ${color};">
+                            ${SUBSTAT_VALUES.map(v => `<option value="${v}" ${selectedSubstatVal === v ? 'selected' : ''}>${v}%</option>`).join("")}
+                        </select>
+                    </label>
+                `;
+            }
+            html += `
+                    </div>
+                    <div class="accessory-form-group" style="flex: 1;">
+                        <h4 class="${colorClass}">${newAccLabel}</h4>
+                        <label>Base Damage: <input type="number" id="newAccRaw" value="0" oninput="compareAccessories()"/></label>
+            `;
+            for (let i = 1; i <= 4; i++) {
+                html += `
+                    <label>Slot ${i}:
+                        <select id="newAccSlot${i}Type" onchange="compareAccessories(); colorComparisonSelects('newAccSlot${i}Type', 'newAccSlot${i}Val')">
+                            <option value="none">--</option>
+                            ${ACCESSORY_ELEMENTS.map(accEl =>
+                                `<option value="${accEl}">${ELEMENT_LABELS[accEl] || "All Attributes"}</option>`
+                            ).join("")}
+                        </select>
+                        <select id="newAccSlot${i}Val" onchange="compareAccessories(); colorComparisonSelects('newAccSlot${i}Type', 'newAccSlot${i}Val')">
+                            ${SUBSTAT_VALUES.map(v => `<option value="${v}">${v}%</option>`).join("")}
+                        </select>
+                    </label>
+                `;
+            }
+            html += `
+                    </div>
+                </div>
+            `;
+            formContainer.innerHTML = html;
+            compareAccessories();
+        }
+
+        function colorComparisonSelects(typeId, valId) {
+            const typeSelect = document.getElementById(typeId);
+            const valSelect = document.getElementById(valId);
+            const selectedVal = Number(valSelect.value);
+            
+            // Apply color style directly
+            if (selectedVal > 1) {
+                const color = getSubstatColor(selectedVal);
+                typeSelect.style.color = color;
+                valSelect.style.color = color;
+            } else {
+                typeSelect.style.color = '#333';
+                valSelect.style.color = '#333';
+            }
+        }
+        
+        function compareAccessories() {
+            const mainElement = document.getElementById("accessoryToCompare").value;
+            const resultDiv = document.getElementById("accessoryComparisonResult");
+
+            if (mainElement === "none" || !document.getElementById("newAccRaw")) {
+                resultDiv.innerHTML = "Select an option above to open the comparison form.";
+                return;
+            }
+
+            const oldAccessories = getAccessoryData();
+            const newAccessories = getAccessoryData();
+            newAccessories[mainElement] = {
+              raw: Number(document.getElementById("newAccRaw").value) || 0,
+              slots: []
+            };
+            for(let i = 1; i <= 4; i++) {
+              newAccessories[mainElement].slots.push({
+                type: document.getElementById(`newAccSlot${i}Type`).value,
+                val: Number(document.getElementById(`newAccSlot${i}Val`).value) || 0
+              });
+            }
+            
+            const oldTotalDamages = calculateDamage(oldAccessories);
+            const newTotalDamages = calculateDamage(newAccessories);
+
+            let comparisonText = `**Damage changes when you equip the new accessory:**<br/>`;
+            let hasChange = false;
+
+            for (const key of ELEMENTS) {
+                const oldDamage = oldTotalDamages[key].totalDamage;
+                const newDamage = newTotalDamages[key].totalDamage;
+                
+                if (oldDamage === 0 && newDamage === 0) continue;
+
+                let differencePercentage = 0;
+                if (oldDamage !== 0) {
+                    differencePercentage = ((newDamage - oldDamage) / oldDamage) * 100;
+                } else if (newDamage !== 0) {
+                    differencePercentage = 100;
+                }
+
+                if (Math.abs(differencePercentage) > 0.01) {
+                    hasChange = true;
+                    const sign = differencePercentage > 0 ? "+" : "";
+                    const colorClass = differencePercentage > 0 ? "green-text" : "red-text";
+                    comparisonText += `<span class="${colorClass}">⚡ ${ELEMENT_LABELS[key]} Damage: **${sign}${differencePercentage.toFixed(2)}%**</span><br/>`;
+                }
+            }
+
+            if (!hasChange) {
+                comparisonText += `No changes in damage found.`;
+            }
+
+            resultDiv.innerHTML = comparisonText;
+        }
+
+        function equipNewAccessory() {
+            const mainElement = document.getElementById("accessoryToCompare").value;
+            if (mainElement === "none" || !document.getElementById("newAccRaw")) return;
+
+            const newRaw = (Number(document.getElementById("newAccRaw").value) || 0);
+            document.getElementById(`${mainElement}Raw`).value = newRaw;
+
+            for (let i = 1; i <= 4; i++) {
+                const newType = document.getElementById(`newAccSlot${i}Type`).value;
+                const newVal = document.getElementById(`newAccSlot${i}Val`).value;
+                document.getElementById(`${mainElement}Slot${i}Type`).value = newType;
+                document.getElementById(`${mainElement}Slot${i}Val`).value = newVal;
+            }
+
+            calculateAll();
+            createAccessoryComparisonForm();
+        }
+        
+        function calculateAll() {
+          saveSettings();
+          updateResults();
+          compareBossDamage();
+          compareMobDamage();
+          const selectedElement = document.getElementById("accessoryToCompare").value;
+          if (selectedElement !== "none") {
+            compareAccessories();
+          }
+        }
+
+        function handleMainAccessoryChange(elementKey, slotIndex) {
+            const typeSelect = document.getElementById(`${elementKey}Slot${slotIndex}Type`);
+            const valSelect = document.getElementById(`${elementKey}Slot${slotIndex}Val`);
+            const selectedVal = Number(valSelect.value);
+            
+            // Apply color style directly
+            if (selectedVal > 1) {
+                const color = getSubstatColor(selectedVal);
+                typeSelect.style.color = color;
+                valSelect.style.color = color;
+            } else {
+                typeSelect.style.color = '#333';
+                valSelect.style.color = '#333';
+            }
+            calculateAll();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createAccessorySection();
+            
+            // Since the IDs remain the same, loading works fine.
+            loadSettings();
+            calculateAll();
+
+            // Add event listeners and initial coloring for main accessory sections
+            for(const key of ELEMENTS) {
+                for(let i = 1; i <= 4; i++) {
+                    const typeSelect = document.getElementById(`${key}Slot${i}Type`);
+                    const valSelect = document.getElementById(`${key}Slot${i}Val`);
+                    if (typeSelect && valSelect) {
+                        typeSelect.addEventListener('change', () => handleMainAccessoryChange(key, i));
+                        valSelect.addEventListener('change', () => handleMainAccessoryChange(key, i));
+                        handleMainAccessoryChange(key, i);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
